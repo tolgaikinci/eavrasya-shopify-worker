@@ -182,12 +182,21 @@ export default {
       if (!checkSession(request, env)) {
         return new Response('{"error":"Yetkisiz erisim"}', { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders() } });
       }
-      const r = await fetch(`https://${env.STORE}/admin/oauth/access_token`, {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: `grant_type=client_credentials&client_id=${env.CLIENT_ID}&client_secret=${env.CLIENT_SECRET}`,
-      });
-      return new Response(await r.text(), { headers: { "Content-Type": "application/json", ...corsHeaders() } });
+      try {
+        const storeUrl = `https://${env.STORE}/admin/oauth/access_token`;
+        const r = await fetch(storeUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: `grant_type=client_credentials&client_id=${env.CLIENT_ID}&client_secret=${env.CLIENT_SECRET}`,
+        });
+        const text = await r.text();
+        if (!r.ok) {
+          return new Response(JSON.stringify({ error: `Shopify hata: ${r.status}`, detail: text, store: env.STORE }), { status: r.status, headers: { "Content-Type": "application/json", ...corsHeaders() } });
+        }
+        return new Response(text, { headers: { "Content-Type": "application/json", ...corsHeaders() } });
+      } catch (e) {
+        return new Response(JSON.stringify({ error: `Baglanti hatasi: ${e.message}`, store: env.STORE }), { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders() } });
+      }
     }
     if (path === "/refresh-catalog" && request.method === "POST") {
       if (!checkSession(request, env)) {
