@@ -888,10 +888,10 @@ function updateTotal(){
   var si=$("shippingInfo");
   var freeRule=SHIPPING_RULES.find(function(r){return parseFloat(r.price)===0&&r.min_order});
   if(ship.price===0){
-    si.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center"><span style="color:#9ca3af">🚚 Kargo</span><span style="color:#34d399;font-weight:600">'+escHtml(ship.name)+'</span></div>';
+    si.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span style="color:#9ca3af">🚚 Kargo</span><span style="color:#34d399;font-weight:600">'+escHtml(ship.name)+'</span></div>';
   }else{
     var hint=freeRule?'<div style="font-size:11px;color:#6b7280;margin-top:6px">'+parseFloat(freeRule.min_order).toFixed(0)+' TL ve üzeri ücretsiz kargo ('+( parseFloat(freeRule.min_order)-subtotal).toFixed(0)+' TL kaldı)</div>':"";
-    si.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center"><span style="color:#9ca3af">🚚 Kargo</span><span style="color:#fbbf24;font-weight:600">'+escHtml(ship.name)+' — '+ship.price.toFixed(2)+' TL</span></div>'+hint;
+    si.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span style="color:#9ca3af">🚚 Kargo</span><span style="color:#fbbf24;font-weight:600">'+escHtml(ship.name)+' — '+ship.price.toFixed(2)+' TL</span></div>'+hint;
   }
 }
 function applyBundle(){
