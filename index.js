@@ -446,7 +446,6 @@ select.inp{cursor:pointer}
 @keyframes confettiDrop{0%{opacity:1;transform:translateY(0) rotate(0deg)}100%{opacity:0;transform:translateY(60px) rotate(360deg)}}
 .order-summary{background:#fff;border-radius:16px;padding:0;margin-bottom:14px;color:#1a1a1a;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.08)}
 .os-header{background:linear-gradient(135deg,#0d7a6e 0%,#128C7E 30%,#25D366 100%);padding:28px 20px 24px;text-align:center;position:relative;overflow:hidden}
-.os-header::before{content:"";position:absolute;top:0;left:0;right:0;bottom:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")}
 .os-confetti{position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;overflow:hidden}
 .os-confetti span{position:absolute;top:-8px;width:8px;height:8px;border-radius:2px;animation:confettiDrop 1.5s ease-out forwards}
 .os-check-wrap{animation:checkPop .5s cubic-bezier(.34,1.56,.64,1) .1s both}
@@ -1045,9 +1044,12 @@ function resetOrder(){parsed=null;$("msgInput").value="";hide("successCard");sho
 async function copyScreenshot(){
   try{
     $("copyScreenBtn").textContent="⏳ Oluşturuluyor...";
+    var replyEl=$("sucReply");replyEl.removeAttribute("contenteditable");
+    var h2cOpts={scale:2,backgroundColor:"#ffffff",useCORS:true,allowTaint:false,logging:false};
     var isMobile="ontouchstart" in window||navigator.maxTouchPoints>0;
     if(isMobile&&navigator.share){
-      var canvas=await html2canvas($("orderSummary"),{scale:2,backgroundColor:"#ffffff"});
+      var canvas=await html2canvas($("orderSummary"),h2cOpts);
+      replyEl.setAttribute("contenteditable","true");
       var blob=await new Promise(function(r){canvas.toBlob(r,"image/png")});
       var file=new File([blob],"siparis.png",{type:"image/png"});
       if(navigator.canShare&&navigator.canShare({files:[file]})){
@@ -1057,11 +1059,12 @@ async function copyScreenshot(){
         return;
       }
     }
-    var blobPromise=html2canvas($("orderSummary"),{scale:2,backgroundColor:"#ffffff"}).then(function(c){return new Promise(function(r){c.toBlob(r,"image/png")})});
+    var blobPromise=html2canvas($("orderSummary"),h2cOpts).then(function(c){replyEl.setAttribute("contenteditable","true");return new Promise(function(r){c.toBlob(r,"image/png")})});
     await navigator.clipboard.write([new ClipboardItem({"image/png":blobPromise})]);
     $("copyScreenBtn").textContent="✅ Kopyalandı!";
     setTimeout(function(){$("copyScreenBtn").textContent="📸 Görüntü Paylaş"},2000);
   }catch(e){
+    $("sucReply").setAttribute("contenteditable","true");
     $("copyScreenBtn").textContent="📸 Görüntü Paylaş";
     showErr("Görüntü kopyalanamadı: "+e.message);
   }
