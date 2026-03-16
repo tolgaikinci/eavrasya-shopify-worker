@@ -446,12 +446,12 @@ select.inp{cursor:pointer}
 .os-header .check{width:36px;height:36px;background:rgba(255,255,255,.25);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:6px;color:#fff}
 .os-header h2{color:#fff;font-size:16px;margin-bottom:2px}
 .os-header p{color:rgba(255,255,255,.85);font-size:11px}
-.os-order-no{text-align:center;padding:10px 16px;background:#f0faf8;border-bottom:1px solid #e0f2ee}
-.os-order-label{font-size:11px;color:#666;font-weight:600;display:block}
+.os-order-no{display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 16px;background:#f0faf8;border-bottom:1px solid #e0f2ee}
+.os-order-label{font-size:12px;color:#666;font-weight:600}
 .os-order-value{font-size:16px;font-weight:800;color:#128C7E}
 .os-body{padding:14px 16px}
 .os-section{margin-bottom:12px}
-.os-section-title{font-size:11px;color:#128C7E;font-weight:700;letter-spacing:.5px;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid #e0f2ee}
+.os-section-title{font-size:11px;color:#8bb5af;font-weight:600;letter-spacing:.5px;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid #e0f2ee}
 .os-row{display:flex;justify-content:space-between;font-size:12px;padding:2px 0;color:#333}
 .os-row.bold{font-weight:600;color:#1a1a1a}
 .os-product{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #f0f0f0}
