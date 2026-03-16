@@ -4,16 +4,18 @@ Bu dosya, Claude Code'un (claude.ai/code) bu depodaki kodla çalışırken rehbe
 
 ## Proje Özeti
 
-Eavrasya (Türk e-ticaret) için WhatsApp'tan Shopify'a sipariş yönetim aracı olarak çalışan bir Cloudflare Worker. Uygulamanın tamamı tek bir `index.js` dosyasından (~960 satır) oluşur ve backend API, satır içi HTML/CSS/JS frontend ve giriş sayfasını içerir.
+Eavrasya (Türk e-ticaret) için WhatsApp'tan Shopify'a sipariş yönetim aracı olarak çalışan bir Cloudflare Worker. Uygulamanın tamamı tek bir `index.js` dosyasından (~1000 satır) oluşur ve backend API, satır içi HTML/CSS/JS frontend ve giriş sayfasını içerir.
 
 ## Mimari
 
 **Tek dosyalı Cloudflare Worker** (`index.js`) — build adımı yok, package.json yok, bağımlılık yok (frontend'de CDN üzerinden yüklenen html2canvas hariç).
 
 ### Backend (Cloudflare Worker)
-- **Kimlik Doğrulama**: `ADMIN_KEY` ortam değişkeni ile çerez tabanlı oturum. `checkSession()` her korumalı rotada doğrulama yapar.
+- **Kimlik Doğrulama**: `ADMIN_KEY` ortam değişkeni ile çerez tabanlı oturum. Oturum çerezi şifrenin SHA-256 hash'ini kullanır (`hashKey()`). `checkSession()` (async) her korumalı rotada doğrulama yapar.
+- **Rate Limiting**: `/login` endpoint'inde IP bazlı rate limiting (5 deneme/dakika). In-memory Map ile çalışır (worker restart'ta sıfırlanır).
+- **CORS**: Same-origin kontrolü — sadece aynı origin'den gelen isteklere izin verilir (`corsHeaders(request)`).
 - **Rotalar**:
-  - `POST /login` / `/logout` — oturum yönetimi
+  - `POST /login` / `/logout` — oturum yönetimi (rate limiting korumalı)
   - `POST /analyze` — WhatsApp mesajını Claude Haiku API'ye göndererek yapılandırılmış JSON çıkarımı yapar (müşteri bilgisi, ürünler, adres doğrulama)
   - `POST /refresh-catalog` — CF Cache API'yi temizler ve Shopify ürünlerini yeniden çeker
   - `/token` — client credentials grant ile Shopify OAuth erişim token'ı alır
@@ -21,11 +23,12 @@ Eavrasya (Türk e-ticaret) için WhatsApp'tan Shopify'a sipariş yönetim aracı
   - `GET /` — oturum durumuna göre giriş HTML'i veya ana uygulama HTML'i sunar
 
 ### Frontend (Satır İçi HTML)
-- İki görünüm: giriş sayfası (`getLoginHTML()`) ve ana uygulama (`getHTML(catalog)`)
+- İki görünüm: giriş sayfası (`getLoginHTML()`) ve ana uygulama (`getHTML(catalog, storeSlug)`)
 - Ana uygulamada sekmeli arayüz: "Yeni" (yeni sipariş) ve "Geçmiş" (sipariş geçmişi)
 - Akış: Shopify'a Bağlan → WhatsApp mesajını yapıştır → AI analiz eder → Formu kontrol et/düzenle → Shopify siparişi oluştur → Yanıt mesajını kopyala
 - İl/ilçe/ürün açılır menüleri için özel aranabilir seçim bileşeni (`ss-wrap`/`ss-input`/`ss-list`)
 - Türkiye il/ilçe verileri (`TURKEY_CITIES`) büyük bir sabit olarak gömülü (~80 satır)
+- Mağaza slug'ı `env.STORE`'dan dinamik türetilir (hardcoded değil)
 
 ### Temel Veri Akışı
 1. `fetchCatalog()` → Shopify OAuth → ürünleri çek → varyantları `{variant_id, title, variant, price}` şeklinde düzleştir
@@ -34,16 +37,28 @@ Eavrasya (Türk e-ticaret) için WhatsApp'tan Shopify'a sipariş yönetim aracı
 4. `analyze` endpoint'i → Claude Haiku WhatsApp metnini ayrıştırır → müşteri, ürünler ve adres doğrulama skoru içeren yapılandırılmış JSON döndürür
 5. Frontend `createOrder()` → vergi satırları (%18 KDV), indirim dağılımı ve kargo ile Shopify sipariş payload'ını oluşturur
 
-## Ortam Değişkenleri (Cloudflare Workers Dashboard)
+## Güvenlik
 
-- `STORE` — Shopify mağaza alan adı
+- **XSS koruması**: `escHtml()` fonksiyonu `&`, `<`, `>`, `"`, `'` karakterlerini encode eder
+- **Oturum**: Çerez değeri şifrenin SHA-256 hash'idir, şifre doğrudan çerezde tutulmaz
+- **CORS**: `Access-Control-Allow-Origin: *` yerine same-origin kontrolü
+- **Brute-force**: IP bazlı rate limiting (5 deneme/dakika)
+- **Çerez ayarları**: `HttpOnly; Secure; SameSite=Strict`
+
+## Ortam Değişkenleri (Sadece Cloudflare Workers Dashboard)
+
+- `STORE` — Shopify mağaza alan adı (örn: `magaza.myshopify.com`)
 - `CLIENT_ID` / `CLIENT_SECRET` — Shopify OAuth kimlik bilgileri
 - `CLAUDE_KEY` — Anthropic API anahtarı
-- `ADMIN_KEY` — yönetici şifresi (aynı zamanda oturum çerezi değeri olarak kullanılır)
+- `ADMIN_KEY` — yönetici şifresi (SHA-256 hash'lenerek oturum çerezinde kullanılır)
 
 ## Geliştirme ve Dağıtım
 
-Cloudflare Worker olarak deploy edilir. Yerel build, test veya lint araçları yapılandırılmamıştır. Deploy için Cloudflare Workers dashboard'u veya `wrangler` CLI kullanılır.
+- **Deploy**: Cloudflare Git entegrasyonu — `master` branch'a push yapıldığında otomatik deploy tetiklenir
+- **Build**: Build adımı yok, `npx wrangler deploy` doğrudan çalışır
+- **Konfigürasyon**: `wrangler.toml` (worker adı: `yellow-tooth-62ea`, compatibility_date: `2025-01-01`)
+- **GitHub Actions kullanılmıyor** — deploy tamamen Cloudflare tarafında yönetilir
+- **Secret'lar sadece Cloudflare Dashboard'da** tanımlıdır (GitHub Secrets'ta tutulmaz)
 
 ## Dil ve Yerelleştirme
 
