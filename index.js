@@ -442,16 +442,16 @@ select.inp{cursor:pointer}
 .addr-fix-btn:hover{background:rgba(245,158,11,.25)}
 .os-capture *,.os-capture{animation:none!important;opacity:1!important;transform:none!important}
 .order-summary{background:#fff;border-radius:12px;padding:0;margin-bottom:12px;color:#1a1a1a;overflow:hidden}
-.os-header{background:linear-gradient(135deg,#128C7E,#25D366);padding:12px 16px;text-align:center;display:flex;align-items:center;justify-content:center;gap:8px}
-.os-header .check{width:28px;height:28px;background:rgba(255,255,255,.25);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:16px;color:#fff;flex-shrink:0}
-.os-header h2{color:#fff;font-size:15px;margin:0}
-.os-header p{color:rgba(255,255,255,.85);font-size:10px}
-.os-order-no{display:flex;align-items:center;gap:8px;padding:8px 16px;background:#f0faf8;border-bottom:1px solid #e0f2ee}
-.os-order-label{font-size:11px;color:#666;font-weight:600}
-.os-order-value{font-size:14px;font-weight:800;color:#128C7E}
+.os-header{background:linear-gradient(135deg,#128C7E,#25D366);padding:16px;text-align:center}
+.os-header .check{width:36px;height:36px;background:rgba(255,255,255,.25);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:6px;color:#fff}
+.os-header h2{color:#fff;font-size:16px;margin-bottom:2px}
+.os-header p{color:rgba(255,255,255,.85);font-size:11px}
+.os-order-no{text-align:center;padding:10px 16px;background:#f0faf8;border-bottom:1px solid #e0f2ee}
+.os-order-label{font-size:11px;color:#666;font-weight:600;display:block}
+.os-order-value{font-size:16px;font-weight:800;color:#128C7E}
 .os-body{padding:14px 16px}
 .os-section{margin-bottom:12px}
-.os-section-title{font-size:11px;color:#128C7E;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid #e0f2ee}
+.os-section-title{font-size:11px;color:#128C7E;font-weight:700;letter-spacing:.5px;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid #e0f2ee}
 .os-row{display:flex;justify-content:space-between;font-size:12px;padding:2px 0;color:#333}
 .os-row.bold{font-weight:600;color:#1a1a1a}
 .os-product{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #f0f0f0}
@@ -471,7 +471,7 @@ select.inp{cursor:pointer}
 .os-info-row{display:flex;align-items:center;padding:3px 0;font-size:12px;color:#333}
 .os-info-text{flex:1}
 .os-info-text.bold{font-weight:600;color:#1a1a1a}
-.os-sms-notice{background:#e8f5e9;border:1px solid #c8e6c9;border-radius:8px;padding:8px 12px;font-size:11px;color:#2e7d32;line-height:1.4;margin-top:4px}
+.os-sms-notice{background:#FFF3CD;border:1px solid #f0e4a6;border-radius:8px;padding:8px 12px;font-size:11px;color:#1a1a1a;line-height:1.4;margin-top:6px}
 .os-wa-section{margin-bottom:0!important}
 .os-wa-inline{background:#005c4b;color:#e9edef;padding:8px 12px;border-radius:8px;font-size:12px;line-height:1.5;outline:none;cursor:text}
 .os-btn-bar{display:flex;gap:8px;margin-bottom:10px}
@@ -485,7 +485,7 @@ select.inp{cursor:pointer}
 .pay-tag{margin-left:8px;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600}
 .pay-tag.cod{background:rgba(245,158,11,.15);color:#fbbf24}
 .pay-tag.eft{background:rgba(59,130,246,.15);color:#60a5fa}
-@media(max-width:480px){body{padding:8px}.wrap{max-width:100%}.hdr-title{font-size:15px}.hdr-sub{font-size:10px}.tab{padding:4px 8px;font-size:11px}.card{padding:12px}.grid{grid-template-columns:1fr}.logo{width:34px;height:34px;font-size:16px;border-radius:10px}.badge{width:22px;height:22px}.btn-big{padding:12px;font-size:14px}.pay-btn{padding:12px;font-size:12px}.bundle-btn{font-size:10px;padding:6px}.discount-row .inp{width:70px}.discount-row select{width:50px}.os-header{padding:10px 14px}.os-header .check{width:24px;height:24px;font-size:14px}.os-header h2{font-size:13px}.os-order-no{padding:6px 12px}.os-order-value{font-size:13px}.os-body{padding:10px 12px}.os-section{margin-bottom:8px}.os-actions .btn{padding:8px 16px;font-size:12px}.os-actions a{padding:8px 12px;font-size:12px}.os-btn-bar .btn{padding:9px;font-size:12px}.sm{font-size:10px;padding:3px 7px}.token-bar{gap:5px;padding:5px 8px;font-size:11px}.ss-list{max-height:150px}.ss-item{padding:8px 10px;font-size:13px}.tag{padding:2px 8px;font-size:9px}.product-card{padding:10px}.hdr{padding-bottom:10px;margin-bottom:12px}.qty-btn{width:40px;height:40px;font-size:20px}.qty-inp{width:44px;font-size:16px}}
+@media(max-width:480px){body{padding:8px}.wrap{max-width:100%}.hdr-title{font-size:15px}.hdr-sub{font-size:10px}.tab{padding:4px 8px;font-size:11px}.card{padding:12px}.grid{grid-template-columns:1fr}.logo{width:34px;height:34px;font-size:16px;border-radius:10px}.badge{width:22px;height:22px}.btn-big{padding:12px;font-size:14px}.pay-btn{padding:12px;font-size:12px}.bundle-btn{font-size:10px;padding:6px}.discount-row .inp{width:70px}.discount-row select{width:50px}.os-header{padding:12px}.os-header .check{width:30px;height:30px;font-size:16px}.os-header h2{font-size:14px}.os-order-no{padding:6px 12px}.os-order-value{font-size:13px}.os-body{padding:10px 12px}.os-section{margin-bottom:8px}.os-actions .btn{padding:8px 16px;font-size:12px}.os-actions a{padding:8px 12px;font-size:12px}.os-btn-bar .btn{padding:9px;font-size:12px}.sm{font-size:10px;padding:3px 7px}.token-bar{gap:5px;padding:5px 8px;font-size:11px}.ss-list{max-height:150px}.ss-item{padding:8px 10px;font-size:13px}.tag{padding:2px 8px;font-size:9px}.product-card{padding:10px}.hdr{padding-bottom:10px;margin-bottom:12px}.qty-btn{width:40px;height:40px;font-size:20px}.qty-inp{width:44px;font-size:16px}}
 </style>
 </head>
 <body>
@@ -553,21 +553,21 @@ select.inp{cursor:pointer}
         <div class="os-header">
           <div class="check">✓</div>
           <h2>Sipariş Onaylandı</h2>
+          <p id="sucDate"></p>
         </div>
         <div class="os-order-no">
-          <span class="os-order-label">Sipariş No:</span>
+          <span class="os-order-label">Sipariş Numarası</span>
           <span class="os-order-value" id="sucOrderName"></span>
-          <span style="margin-left:auto;font-size:10px;color:#999" id="sucDate"></span>
         </div>
         <div class="os-body">
           <div class="os-section">
-            <div class="os-section-title">Sipariş Detayları</div>
+            <div class="os-section-title">SİPARİŞ DETAYLARI</div>
             <div id="sucProducts"></div>
             <div class="os-row" style="padding-top:8px"><span>Nakliye</span><span id="sucShipping" style="font-weight:600"></span></div>
             <div class="os-total"><span>Toplam</span><span id="sucTotal"></span></div>
           </div>
           <div class="os-section">
-            <div class="os-section-title">Teslimat Bilgileri</div>
+            <div class="os-section-title">TESLİMAT BİLGİLERİ</div>
             <div class="os-info-row"><span class="os-info-text bold" id="sucCustomer"></span></div>
             <div class="os-info-row"><span class="os-info-text" id="sucPhone"></span></div>
             <div class="os-info-row"><span class="os-info-text" id="sucAddress"></span></div>
@@ -575,15 +575,15 @@ select.inp{cursor:pointer}
             <div class="os-sms-notice">Siparişiniz kargoya teslim edildiğinde telefon numaranıza SMS olarak kargo takip bilgileri gönderilecektir.</div>
           </div>
           <div class="os-section">
-            <div class="os-section-title">Ödeme Yöntemi</div>
+            <div class="os-section-title">ÖDEME YÖNTEMİ</div>
             <span class="os-payment" id="sucPayment"></span>
           </div>
           <div class="os-section" id="sucNoteSection">
-            <div class="os-section-title">Sipariş Notu</div>
+            <div class="os-section-title">SİPARİŞ NOTU</div>
             <div class="os-info-row"><span class="os-info-text" id="sucNote"></span></div>
           </div>
           <div class="os-section os-wa-section">
-            <div class="os-section-title">WhatsApp Yanıtı</div>
+            <div class="os-section-title">WHATSAPP YANITI</div>
             <div id="sucReply" contenteditable="true" class="os-wa-inline"></div>
           </div>
         </div>
