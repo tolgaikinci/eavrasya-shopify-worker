@@ -144,54 +144,90 @@ async function getCatalog(env) {
   }));
   return catalog;
 }
-function checkSession(request, env) {
+async function hashKey(key) {
+  const data = new TextEncoder().encode(key);
+  const buf = await crypto.subtle.digest("SHA-256", data);
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
+}
+async function checkSession(request, env) {
   const cookie = request.headers.get("Cookie") || "";
   const match = cookie.match(/session=([^;]+)/);
-  return match && match[1] === env.ADMIN_KEY;
+  if (!match) return false;
+  const expected = await hashKey(env.ADMIN_KEY);
+  return match[1] === expected;
+}
+const loginAttempts = new Map();
+function checkRateLimit(ip) {
+  const now = Date.now();
+  const record = loginAttempts.get(ip);
+  if (!record) return true;
+  if (now - record.first > 60000) { loginAttempts.delete(ip); return true; }
+  return record.count < 5;
+}
+function recordAttempt(ip) {
+  const now = Date.now();
+  const record = loginAttempts.get(ip);
+  if (!record || now - record.first > 60000) { loginAttempts.set(ip, { count: 1, first: now }); }
+  else { record.count++; }
 }
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     const path = url.pathname;
     if (request.method === "OPTIONS") {
-      return new Response(null, { headers: corsHeaders() });
+      return new Response(null, { headers: corsHeaders(request) });
     }
     if (path === "/login" && request.method === "POST") {
+      const clientIP = request.headers.get("CF-Connecting-IP") || "unknown";
+      if (!checkRateLimit(clientIP)) {
+        return new Response('{"error":"Çok fazla deneme. Lütfen 1 dakika bekleyin."}', { status: 429, headers: { "Content-Type": "application/json", "Retry-After": "60", ...corsHeaders(request) } });
+      }
+      recordAttempt(clientIP);
       const { password } = await request.json();
       if (password === env.ADMIN_KEY) {
+        const sessionToken = await hashKey(env.ADMIN_KEY);
         return new Response('{"ok":true}', {
           headers: {
             "Content-Type": "application/json",
-            "Set-Cookie": `session=${env.ADMIN_KEY}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=2592000`,
-            ...corsHeaders()
+            "Set-Cookie": `session=${sessionToken}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=2592000`,
+            ...corsHeaders(request)
           }
         });
       }
-      return new Response('{"error":"Yanlis sifre"}', { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders() } });
+      return new Response('{"error":"Yanlis sifre"}', { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders(request) } });
     }
     if (path === "/logout") {
       return new Response('{"ok":true}', {
         headers: {
           "Content-Type": "application/json",
           "Set-Cookie": "session=; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=0",
-          ...corsHeaders()
+          ...corsHeaders(request)
         }
       });
     }
     if (path === "/token") {
-      if (!checkSession(request, env)) {
-        return new Response('{"error":"Yetkisiz erisim"}', { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders() } });
+      if (!await checkSession(request, env)) {
+        return new Response('{"error":"Yetkisiz erisim"}', { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders(request) } });
       }
-      const r = await fetch(`https://${env.STORE}/admin/oauth/access_token`, {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: `grant_type=client_credentials&client_id=${env.CLIENT_ID}&client_secret=${env.CLIENT_SECRET}`,
-      });
-      return new Response(await r.text(), { headers: { "Content-Type": "application/json", ...corsHeaders() } });
+      try {
+        const storeUrl = `https://${env.STORE}/admin/oauth/access_token`;
+        const r = await fetch(storeUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: `grant_type=client_credentials&client_id=${env.CLIENT_ID}&client_secret=${env.CLIENT_SECRET}`,
+        });
+        const text = await r.text();
+        if (!r.ok) {
+          return new Response(JSON.stringify({ error: `Shopify hata: ${r.status}`, detail: text, store: env.STORE }), { status: r.status, headers: { "Content-Type": "application/json", ...corsHeaders(request) } });
+        }
+        return new Response(text, { headers: { "Content-Type": "application/json", ...corsHeaders(request) } });
+      } catch (e) {
+        return new Response(JSON.stringify({ error: `Baglanti hatasi: ${e.message}`, store: env.STORE }), { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders(request) } });
+      }
     }
     if (path === "/refresh-catalog" && request.method === "POST") {
-      if (!checkSession(request, env)) {
-        return new Response('{"error":"Yetkisiz erisim"}', { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders() } });
+      if (!await checkSession(request, env)) {
+        return new Response('{"error":"Yetkisiz erisim"}', { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders(request) } });
       }
       const cache = caches.default;
       await cache.delete(new Request("https://shopify-api.eavrasya.com/__catalog"));
@@ -199,14 +235,14 @@ export default {
       await cache.put(new Request("https://shopify-api.eavrasya.com/__catalog"), new Response(JSON.stringify(catalog), {
         headers: { "Content-Type": "application/json", "Cache-Control": "max-age=3600" },
       }));
-      return new Response(JSON.stringify({ ok: true, count: catalog.length, products: catalog }), { headers: { "Content-Type": "application/json", ...corsHeaders() } });
+      return new Response(JSON.stringify({ ok: true, count: catalog.length, products: catalog }), { headers: { "Content-Type": "application/json", ...corsHeaders(request) } });
     }
     if (path === "/analyze" && request.method === "POST") {
-      if (!checkSession(request, env)) {
-        return new Response('{"error":"Yetkisiz erisim"}', { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders() } });
+      if (!await checkSession(request, env)) {
+        return new Response('{"error":"Yetkisiz erisim"}', { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders(request) } });
       }
       const { message } = await request.json();
-      if (!message) return new Response('{"error":"message gerekli"}', { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders() } });
+      if (!message) return new Response('{"error":"message gerekli"}', { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders(request) } });
       try {
         const catalog = await getCatalog(env);
         const prompt = buildPrompt(catalog);
@@ -226,45 +262,49 @@ export default {
           }),
         });
         const d = await r.json();
-        if (d.error) return new Response(JSON.stringify({ error: d.error.message }), { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders() } });
+        if (d.error) return new Response(JSON.stringify({ error: d.error.message }), { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders(request) } });
         const txt = d.content?.[0]?.text || "";
         let clean = txt.replace(/```json|```/g, "").trim();
         const fi = clean.indexOf("{"), li = clean.lastIndexOf("}");
         if (fi !== -1 && li > fi) clean = clean.substring(fi, li + 1);
         try {
           JSON.parse(clean);
-          return new Response(clean, { headers: { "Content-Type": "application/json", ...corsHeaders() } });
+          return new Response(clean, { headers: { "Content-Type": "application/json", ...corsHeaders(request) } });
         } catch {
-          return new Response(JSON.stringify({ error: "JSON parse hatasi", raw: txt.substring(0, 300) }), { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders() } });
+          return new Response(JSON.stringify({ error: "JSON parse hatasi", raw: txt.substring(0, 300) }), { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders(request) } });
         }
       } catch (e) {
-        return new Response(JSON.stringify({ error: e.message }), { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders() } });
+        return new Response(JSON.stringify({ error: e.message }), { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders(request) } });
       }
     }
     if (path.startsWith("/api/")) {
-      if (!checkSession(request, env)) {
-        return new Response('{"error":"Yetkisiz erisim"}', { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders() } });
+      if (!await checkSession(request, env)) {
+        return new Response('{"error":"Yetkisiz erisim"}', { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders(request) } });
       }
       const shopifyPath = path.replace("/api/", "");
       const token = request.headers.get("Authorization");
-      if (!token) return new Response('{"error":"Token gerekli"}', { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders() } });
+      if (!token) return new Response('{"error":"Token gerekli"}', { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders(request) } });
       const opts = { method: request.method, headers: { "Content-Type": "application/json", "X-Shopify-Access-Token": token } };
       if (request.method === "POST" || request.method === "PUT") opts.body = await request.text();
       const r = await fetch(`https://${env.STORE}/admin/api/2026-01/${shopifyPath}`, opts);
-      return new Response(await r.text(), { status: r.status, headers: { "Content-Type": "application/json", ...corsHeaders() } });
+      return new Response(await r.text(), { status: r.status, headers: { "Content-Type": "application/json", ...corsHeaders(request) } });
     }
-    if (!checkSession(request, env)) {
+    if (!await checkSession(request, env)) {
       return new Response(getLoginHTML(), { headers: { "Content-Type": "text/html; charset=utf-8" } });
     }
     const catalog = await getCatalog(env);
-    return new Response(getHTML(catalog), { headers: { "Content-Type": "text/html; charset=utf-8" } });
+    const storeSlug = (env.STORE || "").replace(".myshopify.com", "");
+    return new Response(getHTML(catalog, storeSlug), { headers: { "Content-Type": "text/html; charset=utf-8" } });
   }
 };
-function corsHeaders() {
-  return { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS", "Access-Control-Allow-Headers": "Content-Type,Authorization", "Access-Control-Max-Age": "86400" };
+function corsHeaders(request) {
+  const origin = request ? (request.headers.get("Origin") || "") : "";
+  const allowed = origin && new URL(request.url).origin === origin;
+  return { "Access-Control-Allow-Origin": allowed ? origin : "null", "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS", "Access-Control-Allow-Headers": "Content-Type,Authorization", "Access-Control-Max-Age": "86400", "Vary": "Origin" };
 }
-function getHTML(catalog) {
+function getHTML(catalog, storeSlug) {
   const catalogJSON = JSON.stringify(catalog);
+  const storeSlugJSON = JSON.stringify(storeSlug || "");
   return `<!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -483,6 +523,7 @@ select.inp{cursor:pointer}
 </div>
 <script>
 var CATALOG=${catalogJSON};
+var STORE_SLUG=${storeSlugJSON};
 var TURKEY_CITIES_FE=${JSON.stringify(TURKEY_CITIES)};
 var token="",parsed=null,payment="eft",orderHistory=[];
 function $(id){return document.getElementById(id)}
@@ -490,7 +531,7 @@ function show(id){$(id).classList.remove("hidden")}
 function hide(id){$(id).classList.add("hidden")}
 function showErr(m){$("errBox").textContent=m;show("errBox")}
 function hideErr(){hide("errBox")}
-function escHtml(s){var d=document.createElement("div");d.textContent=s;return d.innerHTML}
+function escHtml(s){if(!s)return"";return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;")}
 function switchTab(t){
   if(t==="new"){show("viewNew");hide("viewList");$("tabNew").className="tab active";$("tabList").className="tab"}
   else{hide("viewNew");show("viewList");$("tabList").className="tab active";$("tabNew").className="tab"}
@@ -835,7 +876,7 @@ async function createOrder(){
       $("sucCustomer").textContent=fullName;$("sucPhone").textContent=$("fTel").value;
       $("sucAddress").textContent=addr;$("sucCity").textContent=city;
       $("sucTotal").textContent="₺"+d.total_price;
-      $("sucLink").href="https://admin.shopify.com/store/rjznbi-n4/orders/"+d.id;
+      $("sucLink").href="https://admin.shopify.com/store/"+STORE_SLUG+"/orders/"+d.id;
       var payEl=$("sucPayment");
       if(payment==="cod"){payEl.textContent="🚚 Kapida Odeme";payEl.className="os-payment cod"}
       else{payEl.textContent="🏦 Havale/EFT";payEl.className="os-payment eft"}
@@ -900,7 +941,7 @@ function renderHistory(){
   var el=$("historyList");
   if(orderHistory.length===0){el.innerHTML='<div style="text-align:center;color:#4b5563;padding:20px">Henuz siparis yok</div>';return}
   el.innerHTML=orderHistory.map(function(h){
-    return '<div class="history-item"><div class="top"><div><b>'+escHtml(h.customer)+'</b><a class="link" href="https://admin.shopify.com/store/rjznbi-n4/orders/'+h.id+'" target="_blank">'+escHtml(h.name)+' ↗</a></div><span class="time">'+h.time+'</span></div>'+
+    return '<div class="history-item"><div class="top"><div><b>'+escHtml(h.customer)+'</b><a class="link" href="https://admin.shopify.com/store/'+STORE_SLUG+'/orders/'+h.id+'" target="_blank">'+escHtml(h.name)+' ↗</a></div><span class="time">'+h.time+'</span></div>'+
     '<div class="detail">📞 '+escHtml(h.phone)+' · 📍 '+escHtml(h.city)+' · '+escHtml(h.items)+'<span class="pay-tag '+(h.payment==="Kapida"?"cod":"eft")+'">'+h.payment+'</span></div></div>'
   }).join("");
 }
