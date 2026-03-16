@@ -444,12 +444,13 @@ select.inp{cursor:pointer}
 @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
 @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
 @keyframes confettiDrop{0%{opacity:1;transform:translateY(0) rotate(0deg)}100%{opacity:0;transform:translateY(60px) rotate(360deg)}}
+.os-capture *,.os-capture{animation:none!important;opacity:1!important;transform:none!important}
 .order-summary{background:#fff;border-radius:16px;padding:0;margin-bottom:14px;color:#1a1a1a;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.08)}
 .os-header{background:linear-gradient(135deg,#0d7a6e 0%,#128C7E 30%,#25D366 100%);padding:28px 20px 24px;text-align:center;position:relative;overflow:hidden}
 .os-confetti{position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;overflow:hidden}
 .os-confetti span{position:absolute;top:-8px;width:8px;height:8px;border-radius:2px;animation:confettiDrop 1.5s ease-out forwards}
 .os-check-wrap{animation:checkPop .5s cubic-bezier(.34,1.56,.64,1) .1s both}
-.os-header .check{width:56px;height:56px;background:rgba(255,255,255,.25);backdrop-filter:blur(4px);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:10px;box-shadow:0 4px 16px rgba(0,0,0,.1)}
+.os-header .check{width:56px;height:56px;background:rgba(255,255,255,.3);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:10px;box-shadow:0 4px 16px rgba(0,0,0,.1);color:#fff}
 .os-header h2{color:#fff;font-size:19px;margin-bottom:4px;font-weight:700;animation:fadeUp .4s ease .3s both}
 .os-header p{color:rgba(255,255,255,.9);font-size:13px;font-weight:500;animation:fadeUp .4s ease .4s both}
 .os-order-no{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:#f0faf8;border-bottom:2px solid #e0f2ee;animation:fadeUp .4s ease .35s both}
@@ -1044,12 +1045,14 @@ function resetOrder(){parsed=null;$("msgInput").value="";hide("successCard");sho
 async function copyScreenshot(){
   try{
     $("copyScreenBtn").textContent="⏳ Oluşturuluyor...";
+    var sumEl=$("orderSummary");sumEl.classList.add("os-capture");
     var replyEl=$("sucReply");replyEl.removeAttribute("contenteditable");
+    var confEl=$("confettiBox");confEl.style.display="none";
     var h2cOpts={scale:2,backgroundColor:"#ffffff",useCORS:true,allowTaint:false,logging:false};
     var isMobile="ontouchstart" in window||navigator.maxTouchPoints>0;
     if(isMobile&&navigator.share){
-      var canvas=await html2canvas($("orderSummary"),h2cOpts);
-      replyEl.setAttribute("contenteditable","true");
+      var canvas=await html2canvas(sumEl,h2cOpts);
+      sumEl.classList.remove("os-capture");replyEl.setAttribute("contenteditable","true");confEl.style.display="";
       var blob=await new Promise(function(r){canvas.toBlob(r,"image/png")});
       var file=new File([blob],"siparis.png",{type:"image/png"});
       if(navigator.canShare&&navigator.canShare({files:[file]})){
@@ -1059,12 +1062,12 @@ async function copyScreenshot(){
         return;
       }
     }
-    var blobPromise=html2canvas($("orderSummary"),h2cOpts).then(function(c){replyEl.setAttribute("contenteditable","true");return new Promise(function(r){c.toBlob(r,"image/png")})});
+    var blobPromise=html2canvas(sumEl,h2cOpts).then(function(c){sumEl.classList.remove("os-capture");replyEl.setAttribute("contenteditable","true");confEl.style.display="";return new Promise(function(r){c.toBlob(r,"image/png")})});
     await navigator.clipboard.write([new ClipboardItem({"image/png":blobPromise})]);
     $("copyScreenBtn").textContent="✅ Kopyalandı!";
     setTimeout(function(){$("copyScreenBtn").textContent="📸 Görüntü Paylaş"},2000);
   }catch(e){
-    $("sucReply").setAttribute("contenteditable","true");
+    $("orderSummary").classList.remove("os-capture");$("sucReply").setAttribute("contenteditable","true");$("confettiBox").style.display="";
     $("copyScreenBtn").textContent="📸 Görüntü Paylaş";
     showErr("Görüntü kopyalanamadı: "+e.message);
   }
