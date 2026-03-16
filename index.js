@@ -916,18 +916,31 @@ function setPayment(p){
 function buildDiscountedLineItems(){
   var c=calcDiscount();var sub=c.sub,disc=c.disc;
   var remaining=Math.round(disc*100);
-  return parsed.urunler.map(function(u,i){
+  var results=[];
+  parsed.urunler.forEach(function(u,i){
     var p=parseFloat(u.fiyat)||0;var ld=0;
     if(disc>0){
       if(i<parsed.urunler.length-1){ld=Math.round((p*u.adet/sub)*disc*100);remaining-=ld}
       else{ld=remaining}
     }
-    var newPrice=((p*u.adet*100-ld)/100/u.adet).toFixed(2);
-    var taxAmt=(parseFloat(newPrice)*u.adet*0.18/1.18).toFixed(2);
-    var taxLines=[{title:"KDV",rate:0.18,price:taxAmt}];
-    if(u.variant_id)return{variant_id:u.variant_id,quantity:u.adet,price:newPrice,tax_lines:taxLines};
-    return{title:u.ad,quantity:u.adet,price:newPrice,requires_shipping:true,tax_lines:taxLines};
+    var discLineCents=Math.round(p*u.adet*100)-ld;
+    var perUnitCents=Math.floor(discLineCents/u.adet);
+    var extraCents=discLineCents-perUnitCents*u.adet;
+    function mkLine(vid,title,qty,priceCents){
+      var pr=(priceCents/100).toFixed(2);
+      var tax=(parseFloat(pr)*qty*0.18/1.18).toFixed(2);
+      var tl=[{title:"KDV",rate:0.18,price:tax}];
+      if(vid)return{variant_id:vid,quantity:qty,price:pr,tax_lines:tl};
+      return{title:title,quantity:qty,price:pr,requires_shipping:true,tax_lines:tl};
+    }
+    if(extraCents===0||u.adet===1){
+      results.push(mkLine(u.variant_id,u.ad,u.adet,u.adet===1?discLineCents:perUnitCents));
+    }else{
+      results.push(mkLine(u.variant_id,u.ad,extraCents,perUnitCents+1));
+      results.push(mkLine(u.variant_id,u.ad,u.adet-extraCents,perUnitCents));
+    }
   });
+  return results;
 }
 async function createOrder(){
   if(!parsed||!token)return;
@@ -980,10 +993,11 @@ async function createOrder(){
       if(note){$("sucNote").textContent=note;$("sucNoteSection").style.display="block"}
       else{$("sucNoteSection").style.display="none"}
       var prodHTML="";var discItems=buildDiscountedLineItems();
-      for(var idx=0;idx<parsed.urunler.length;idx++){
-        var u=parsed.urunler[idx];var di=discItems[idx];var dp=di.price;
-        var lt=(parseFloat(dp)*u.adet).toFixed(2);
-        prodHTML+='<div class="os-product"><div><div class="name">'+escHtml(u.ad)+'</div><div class="qty">'+u.adet+' adet × ₺'+dp+'</div></div><div class="price">₺'+lt+'</div></div>';
+      for(var idx=0;idx<discItems.length;idx++){
+        var di=discItems[idx];var dp=di.price;var dq=di.quantity;
+        var dName=di.title||(parsed.urunler.find(function(u){return u.variant_id&&u.variant_id===di.variant_id})||{}).ad||"Ürün";
+        var lt=(parseFloat(dp)*dq).toFixed(2);
+        prodHTML+='<div class="os-product"><div><div class="name">'+escHtml(dName)+'</div><div class="qty">'+dq+' adet × ₺'+dp+'</div></div><div class="price">₺'+lt+'</div></div>';
       }
       $("sucProducts").innerHTML=prodHTML;
       var payLabel=payment==="cod"?"kapıda ödeme":"havale";
