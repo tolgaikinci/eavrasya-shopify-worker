@@ -847,7 +847,7 @@ function renderProducts(){
       CATALOG.map(function(c){var label=escHtml(c.title+(c.variant?" ("+c.variant+")":""))+" - "+c.price+" TL";return '<div class="ss-item'+(u.variant_id===c.variant_id?" sel":"")+'" data-val="'+c.variant_id+'" onclick="selectSS($(\\'prod_'+i+'\\'),\\''+c.variant_id+'\\',\\''+escHtml(c.title+(c.variant?" ("+c.variant+")":""))+'\\',function(){changeVariant('+i+',\\''+c.variant_id+'\\')})">'+label+'</div>'}).join("")+
       '</div></div></div>'+
       '<div style="display:flex;gap:6px">'+
-      '<div><label class="lbl">Adet</label><div style="display:flex;align-items:center;gap:0"><button class="qty-btn" onclick="updateAdet('+i+',(parseInt($(\'qty_'+i+'\').value)||1)-1)">−</button><input class="inp qty-inp" id="qty_'+i+'" type="number" value="'+u.adet+'" onchange="updateAdet('+i+',this.value)"><button class="qty-btn" onclick="updateAdet('+i+',(parseInt($(\'qty_'+i+'\').value)||1)+1)">+</button></div></div>'+
+      '<div><label class="lbl">Adet</label><div style="display:flex;align-items:center;gap:0"><button class="qty-btn" onclick="updateAdet('+i+',(parseInt($(\\'qty_'+i+'\\').value)||1)-1)">−</button><input class="inp qty-inp" id="qty_'+i+'" type="number" value="'+u.adet+'" onchange="updateAdet('+i+',this.value)"><button class="qty-btn" onclick="updateAdet('+i+',(parseInt($(\\'qty_'+i+'\\').value)||1)+1)">+</button></div></div>'+
       '<div style="flex:1;display:flex;align-items:end;padding-bottom:4px"><span style="font-size:13px;color:'+(m?"#34d399":"#fbbf24")+';font-weight:600">'+u.fiyat+' TL</span></div></div>';
     el.appendChild(div);
   });
