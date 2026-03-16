@@ -453,6 +453,9 @@ select.inp{cursor:pointer}
 .os-header .check{width:56px;height:56px;background:rgba(255,255,255,.25);backdrop-filter:blur(4px);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:10px;box-shadow:0 4px 16px rgba(0,0,0,.1)}
 .os-header h2{color:#fff;font-size:19px;margin-bottom:4px;font-weight:700;animation:fadeUp .4s ease .3s both}
 .os-header p{color:rgba(255,255,255,.9);font-size:13px;font-weight:500;animation:fadeUp .4s ease .4s both}
+.os-order-no{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:#f0faf8;border-bottom:2px solid #e0f2ee;animation:fadeUp .4s ease .35s both}
+.os-order-label{font-size:12px;color:#555;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.os-order-value{font-size:18px;font-weight:800;color:#128C7E;letter-spacing:.5px}
 .os-body{padding:20px}
 .os-section{margin-bottom:18px;animation:fadeUp .4s ease both}
 .os-section:nth-child(1){animation-delay:.3s}
@@ -477,13 +480,14 @@ select.inp{cursor:pointer}
 .os-actions .btn{padding:12px 28px;border-radius:12px;font-weight:600;transition:all .2s}
 .os-actions a{display:inline-flex;align-items:center;text-decoration:none;color:#128C7E;padding:12px 20px;border:2px solid #128C7E;border-radius:12px;font-size:13px;font-weight:600;transition:all .2s}
 .os-actions a:hover{background:#128C7E;color:#fff}
-.os-wa-box{background:linear-gradient(135deg,#0d1117,#131921);border:1px solid #1e293b;border-radius:14px;padding:18px;margin-bottom:14px;animation:fadeUp .4s ease .6s both}
-.os-wa-label{display:flex;align-items:center;gap:8px;margin-bottom:12px}
-.os-wa-label span:first-child{width:28px;height:28px;background:linear-gradient(135deg,#128C7E,#25D366);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px}
-.os-wa-label span:last-child{color:#9ca3af;font-size:13px;font-weight:600;letter-spacing:.3px}
-.os-wa-msg{background:#005c4b;color:#e9edef;padding:12px 16px;border-radius:0 12px 12px 12px;font-size:15px;line-height:1.7;outline:none;cursor:text;box-shadow:0 2px 8px rgba(0,92,75,.2)}
-.os-wa-btns{display:flex;gap:8px;margin-top:14px}
-.os-wa-btns .btn{flex:1;padding:11px;border-radius:10px;font-size:13px}
+.os-info-row{display:flex;align-items:center;gap:10px;padding:6px 0;font-size:13px;color:#555}
+.os-info-icon{font-size:15px;width:20px;text-align:center;flex-shrink:0}
+.os-info-text{flex:1}
+.os-info-text.bold{font-weight:600;color:#1a1a1a;font-size:14px}
+.os-wa-section{margin-bottom:0!important}
+.os-wa-inline{background:#005c4b;color:#e9edef;padding:12px 16px;border-radius:12px;font-size:14px;line-height:1.7;outline:none;cursor:text}
+.os-btn-bar{display:flex;gap:8px;margin-bottom:10px;animation:fadeUp .4s ease .7s both}
+.os-btn-bar .btn{padding:12px;border-radius:10px;font-size:13px}
 .history-item{padding:12px 14px;background:rgba(12,14,20,.5);border-radius:10px;margin-bottom:6px;border:1px solid rgba(255,255,255,.03)}
 .history-item .top{display:flex;justify-content:space-between;align-items:center}
 .history-item b{color:#e5e7eb;font-size:13px}
@@ -493,7 +497,7 @@ select.inp{cursor:pointer}
 .pay-tag{margin-left:8px;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600}
 .pay-tag.cod{background:rgba(245,158,11,.15);color:#fbbf24}
 .pay-tag.eft{background:rgba(59,130,246,.15);color:#60a5fa}
-@media(max-width:480px){body{padding:8px}.wrap{max-width:100%}.hdr-title{font-size:15px}.hdr-sub{font-size:10px}.tab{padding:4px 8px;font-size:11px}.card{padding:12px}.grid{grid-template-columns:1fr}.logo{width:34px;height:34px;font-size:16px;border-radius:10px}.badge{width:22px;height:22px}.btn-big{padding:12px;font-size:14px}.pay-btn{padding:12px;font-size:12px}.bundle-btn{font-size:10px;padding:6px}.discount-row .inp{width:70px}.discount-row select{width:50px}.os-header{padding:16px}.os-header h2{font-size:16px}.os-body{padding:14px}.os-actions .btn{padding:8px 16px;font-size:12px}.os-actions a{padding:8px 12px;font-size:12px}.sm{font-size:10px;padding:3px 7px}.token-bar{gap:5px;padding:5px 8px;font-size:11px}.ss-list{max-height:150px}.ss-item{padding:8px 10px;font-size:13px}.tag{padding:2px 8px;font-size:9px}.product-card{padding:10px}.hdr{padding-bottom:10px;margin-bottom:12px}.qty-btn{width:40px;height:40px;font-size:20px}.qty-inp{width:44px;font-size:16px}}
+@media(max-width:480px){body{padding:8px}.wrap{max-width:100%}.hdr-title{font-size:15px}.hdr-sub{font-size:10px}.tab{padding:4px 8px;font-size:11px}.card{padding:12px}.grid{grid-template-columns:1fr}.logo{width:34px;height:34px;font-size:16px;border-radius:10px}.badge{width:22px;height:22px}.btn-big{padding:12px;font-size:14px}.pay-btn{padding:12px;font-size:12px}.bundle-btn{font-size:10px;padding:6px}.discount-row .inp{width:70px}.discount-row select{width:50px}.os-header{padding:16px}.os-header h2{font-size:16px}.os-order-no{padding:10px 14px}.os-order-value{font-size:15px}.os-body{padding:14px}.os-actions .btn{padding:8px 16px;font-size:12px}.os-actions a{padding:8px 12px;font-size:12px}.os-btn-bar .btn{padding:9px;font-size:12px}.sm{font-size:10px;padding:3px 7px}.token-bar{gap:5px;padding:5px 8px;font-size:11px}.ss-list{max-height:150px}.ss-item{padding:8px 10px;font-size:13px}.tag{padding:2px 8px;font-size:9px}.product-card{padding:10px}.hdr{padding-bottom:10px;margin-bottom:12px}.qty-btn{width:40px;height:40px;font-size:20px}.qty-inp{width:44px;font-size:16px}}
 </style>
 </head>
 <body>
@@ -562,7 +566,11 @@ select.inp{cursor:pointer}
           <div class="os-confetti" id="confettiBox"></div>
           <div class="os-check-wrap"><div class="check">✓</div></div>
           <h2>Siparişiniz Onaylandı!</h2>
-          <p id="sucOrderName"></p>
+          <p id="sucDate"></p>
+        </div>
+        <div class="os-order-no">
+          <span class="os-order-label">Sipariş Numarası</span>
+          <span class="os-order-value" id="sucOrderName"></span>
         </div>
         <div class="os-body">
           <div class="os-section">
@@ -573,10 +581,10 @@ select.inp{cursor:pointer}
           </div>
           <div class="os-section">
             <div class="os-section-title">Teslimat Bilgileri</div>
-            <div class="os-row bold" id="sucCustomer"></div>
-            <div class="os-row" id="sucPhone"></div>
-            <div class="os-row" id="sucAddress"></div>
-            <div class="os-row" id="sucCity"></div>
+            <div class="os-info-row"><span class="os-info-icon">👤</span><span class="os-info-text bold" id="sucCustomer"></span></div>
+            <div class="os-info-row"><span class="os-info-icon">📞</span><span class="os-info-text" id="sucPhone"></span></div>
+            <div class="os-info-row"><span class="os-info-icon">📍</span><span class="os-info-text" id="sucAddress"></span></div>
+            <div class="os-info-row"><span class="os-info-icon">🏙️</span><span class="os-info-text" id="sucCity"></span></div>
           </div>
           <div class="os-section">
             <div class="os-section-title">Ödeme Yöntemi</div>
@@ -584,21 +592,18 @@ select.inp{cursor:pointer}
           </div>
           <div class="os-section" id="sucNoteSection">
             <div class="os-section-title">Sipariş Notu</div>
-            <div class="os-row" id="sucNote"></div>
+            <div class="os-info-row"><span class="os-info-icon">📝</span><span class="os-info-text" id="sucNote"></span></div>
+          </div>
+          <div class="os-section os-wa-section">
+            <div class="os-section-title">WhatsApp Yanıtı</div>
+            <div id="sucReply" contenteditable="true" class="os-wa-inline"></div>
           </div>
         </div>
         <div class="os-footer">Eavrasya · eavrasya.com</div>
       </div>
-      <div class="os-wa-box">
-        <div class="os-wa-label">
-          <span>💬</span>
-          <span>WhatsApp Yanıtı</span>
-        </div>
-        <div id="sucReply" contenteditable="true" class="os-wa-msg"></div>
-        <div class="os-wa-btns">
-          <button class="btn" onclick="copyScreenshot()" id="copyScreenBtn">📸 Görüntü Paylaş</button>
-          <button class="btn" onclick="copyReply()" id="copyReplyBtn">📋 Mesajı Kopyala</button>
-        </div>
+      <div class="os-btn-bar">
+        <button class="btn" onclick="copyScreenshot()" id="copyScreenBtn" style="flex:1">📸 Görüntü Paylaş</button>
+        <button class="btn" onclick="copyReply()" id="copyReplyBtn" style="flex:1">📋 Mesajı Kopyala</button>
       </div>
       <div class="os-actions">
         <button class="btn" onclick="resetOrder()">📝 Yeni Sipariş</button>
@@ -1003,7 +1008,8 @@ async function createOrder(){
       var fullName=$("fAd").value+" "+$("fSoyad").value;
       var addr=$("fAdres1").value;
       var city=$("fIlce").value+"/"+$("fIl").value;
-      $("sucOrderName").textContent=d.name+" - "+new Date().toLocaleDateString("tr-TR");
+      $("sucOrderName").textContent=d.name;
+      $("sucDate").textContent=new Date().toLocaleDateString("tr-TR",{day:"numeric",month:"long",year:"numeric",hour:"2-digit",minute:"2-digit"});
       $("sucCustomer").textContent=fullName;$("sucPhone").textContent=$("fTel").value;
       $("sucAddress").textContent=addr;$("sucCity").textContent=city;
       $("sucTotal").textContent="₺"+d.total_price;
