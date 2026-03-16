@@ -1000,10 +1000,10 @@ function resetOrder(){parsed=null;$("msgInput").value="";hide("successCard");sho
 async function copyScreenshot(){
   try{
     $("copyScreenBtn").textContent="⏳ Oluşturuluyor...";
-    var canvasPromise=html2canvas($("orderSummary"),{scale:2,backgroundColor:"#ffffff"});
-    var blobPromise=canvasPromise.then(function(c){return new Promise(function(r){c.toBlob(r,"image/png")})});
-    if(navigator.share){
-      var blob=await blobPromise;
+    var isMobile="ontouchstart" in window||navigator.maxTouchPoints>0;
+    if(isMobile&&navigator.share){
+      var canvas=await html2canvas($("orderSummary"),{scale:2,backgroundColor:"#ffffff"});
+      var blob=await new Promise(function(r){canvas.toBlob(r,"image/png")});
       var file=new File([blob],"siparis.png",{type:"image/png"});
       if(navigator.canShare&&navigator.canShare({files:[file]})){
         await navigator.share({files:[file]});
@@ -1012,21 +1012,13 @@ async function copyScreenshot(){
         return;
       }
     }
-    if(navigator.clipboard&&navigator.clipboard.write){
-      try{
-        await navigator.clipboard.write([new ClipboardItem({"image/png":blobPromise})]);
-        $("copyScreenBtn").textContent="✅ Kopyalandı!";
-        setTimeout(function(){$("copyScreenBtn").textContent="📸 Görüntü Paylaş"},2000);
-        return;
-      }catch(ce){}
-    }
-    var canvas=await canvasPromise;
-    var a=document.createElement("a");a.download="siparis.png";a.href=canvas.toDataURL("image/png");a.click();
-    $("copyScreenBtn").textContent="✅ İndirildi!";
+    var blobPromise=html2canvas($("orderSummary"),{scale:2,backgroundColor:"#ffffff"}).then(function(c){return new Promise(function(r){c.toBlob(r,"image/png")})});
+    await navigator.clipboard.write([new ClipboardItem({"image/png":blobPromise})]);
+    $("copyScreenBtn").textContent="✅ Kopyalandı!";
     setTimeout(function(){$("copyScreenBtn").textContent="📸 Görüntü Paylaş"},2000);
   }catch(e){
     $("copyScreenBtn").textContent="📸 Görüntü Paylaş";
-    showErr("Görüntü oluşturulamadı: "+e.message);
+    showErr("Görüntü kopyalanamadı: "+e.message);
   }
 }
 function copyReply(){
