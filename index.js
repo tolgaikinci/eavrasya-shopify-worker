@@ -422,6 +422,10 @@ select.inp{cursor:pointer}
 .bundle-bar{display:flex;gap:6px;margin-bottom:8px}
 .bundle-btn{flex:1;padding:8px;background:rgba(59,130,246,.08);border:1px dashed #3b82f6;border-radius:6px;color:#60a5fa;font-size:11px;cursor:pointer;text-align:center;font-weight:600}
 .bundle-btn:hover{background:rgba(59,130,246,.15)}
+.qty-btn{width:36px;height:36px;background:#1a1d27;border:1px solid #2a2d37;border-radius:6px;color:#f0f0f0;font-size:18px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+.qty-btn:active{background:#25D366;color:#fff}
+.qty-inp{width:48px;text-align:center;-moz-appearance:textfield;padding:7px 4px}
+.qty-inp::-webkit-outer-spin-button,.qty-inp::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 .discount-row{display:flex;gap:6px;align-items:center;margin-bottom:10px}
 .discount-row .inp{width:100px}
 .discount-row select{width:60px;padding:7px 4px;background:#0c0e14;border:1px solid #1a1d27;border-radius:5px;color:#f0f0f0;font-size:16px}
@@ -468,7 +472,7 @@ select.inp{cursor:pointer}
 .pay-tag{margin-left:8px;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600}
 .pay-tag.cod{background:rgba(245,158,11,.15);color:#fbbf24}
 .pay-tag.eft{background:rgba(59,130,246,.15);color:#60a5fa}
-@media(max-width:480px){body{padding:8px}.wrap{max-width:100%}.hdr-title{font-size:15px}.hdr-sub{font-size:10px}.tab{padding:4px 8px;font-size:11px}.card{padding:12px}.grid{grid-template-columns:1fr}.logo{width:34px;height:34px;font-size:16px;border-radius:10px}.badge{width:22px;height:22px}.btn-big{padding:12px;font-size:14px}.pay-btn{padding:12px;font-size:12px}.bundle-btn{font-size:10px;padding:6px}.discount-row .inp{width:70px}.discount-row select{width:50px}.os-header{padding:16px}.os-header h2{font-size:16px}.os-body{padding:14px}.os-actions .btn{padding:8px 16px;font-size:12px}.os-actions a{padding:8px 12px;font-size:12px}.sm{font-size:10px;padding:3px 7px}.token-bar{gap:5px;padding:5px 8px;font-size:11px}.ss-list{max-height:150px}.ss-item{padding:8px 10px;font-size:13px}.tag{padding:2px 8px;font-size:9px}.product-card{padding:10px}.hdr{padding-bottom:10px;margin-bottom:12px}}
+@media(max-width:480px){body{padding:8px}.wrap{max-width:100%}.hdr-title{font-size:15px}.hdr-sub{font-size:10px}.tab{padding:4px 8px;font-size:11px}.card{padding:12px}.grid{grid-template-columns:1fr}.logo{width:34px;height:34px;font-size:16px;border-radius:10px}.badge{width:22px;height:22px}.btn-big{padding:12px;font-size:14px}.pay-btn{padding:12px;font-size:12px}.bundle-btn{font-size:10px;padding:6px}.discount-row .inp{width:70px}.discount-row select{width:50px}.os-header{padding:16px}.os-header h2{font-size:16px}.os-body{padding:14px}.os-actions .btn{padding:8px 16px;font-size:12px}.os-actions a{padding:8px 12px;font-size:12px}.sm{font-size:10px;padding:3px 7px}.token-bar{gap:5px;padding:5px 8px;font-size:11px}.ss-list{max-height:150px}.ss-item{padding:8px 10px;font-size:13px}.tag{padding:2px 8px;font-size:9px}.product-card{padding:10px}.hdr{padding-bottom:10px;margin-bottom:12px}.qty-btn{width:40px;height:40px;font-size:20px}.qty-inp{width:44px;font-size:16px}}
 </style>
 </head>
 <body>
@@ -843,7 +847,7 @@ function renderProducts(){
       CATALOG.map(function(c){var label=escHtml(c.title+(c.variant?" ("+c.variant+")":""))+" - "+c.price+" TL";return '<div class="ss-item'+(u.variant_id===c.variant_id?" sel":"")+'" data-val="'+c.variant_id+'" onclick="selectSS($(\\'prod_'+i+'\\'),\\''+c.variant_id+'\\',\\''+escHtml(c.title+(c.variant?" ("+c.variant+")":""))+'\\',function(){changeVariant('+i+',\\''+c.variant_id+'\\')})">'+label+'</div>'}).join("")+
       '</div></div></div>'+
       '<div style="display:flex;gap:6px">'+
-      '<div style="width:60px"><label class="lbl">Adet</label><input class="inp" type="number" value="'+u.adet+'" onchange="updateAdet('+i+',this.value)"></div>'+
+      '<div><label class="lbl">Adet</label><div style="display:flex;align-items:center;gap:0"><button class="qty-btn" onclick="updateAdet('+i+',(parseInt($(\'qty_'+i+'\').value)||1)-1)">−</button><input class="inp qty-inp" id="qty_'+i+'" type="number" value="'+u.adet+'" onchange="updateAdet('+i+',this.value)"><button class="qty-btn" onclick="updateAdet('+i+',(parseInt($(\'qty_'+i+'\').value)||1)+1)">+</button></div></div>'+
       '<div style="flex:1;display:flex;align-items:end;padding-bottom:4px"><span style="font-size:13px;color:'+(m?"#34d399":"#fbbf24")+';font-weight:600">'+u.fiyat+' TL</span></div></div>';
     el.appendChild(div);
   });
@@ -855,7 +859,7 @@ function changeVariant(i,vid){
   else{parsed.urunler[i].variant_id=null}
   renderProducts();
 }
-function updateAdet(i,v){parsed.urunler[i].adet=parseInt(v)||1;updateTotal()}
+function updateAdet(i,v){var n=parseInt(v)||1;if(n<1)n=1;parsed.urunler[i].adet=n;var el=$("qty_"+i);if(el)el.value=n;updateTotal()}
 function removeProduct(i){parsed.urunler.splice(i,1);renderProducts()}
 function addProduct(){if(parsed){parsed.urunler.push({variant_id:null,ad:"",adet:1,fiyat:"0.00"});renderProducts()}}
 function calcDiscount(){
