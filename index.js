@@ -133,6 +133,61 @@ async function fetchCatalog(env) {
     return DEFAULT_CATALOG;
   }
 }
+async function fetchShippingRules(env) {
+  try {
+    const tr = await fetch(`https://${env.STORE}/admin/oauth/access_token`, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: `grant_type=client_credentials&client_id=${env.CLIENT_ID}&client_secret=${env.CLIENT_SECRET}`,
+    });
+    const td = await tr.json();
+    if (!td.access_token) return [];
+    const sr = await fetch(`https://${env.STORE}/admin/api/2026-01/shipping_zones.json`, {
+      headers: { "X-Shopify-Access-Token": td.access_token },
+    });
+    const sd = await sr.json();
+    if (!sd.shipping_zones) return [];
+    const rules = [];
+    for (const zone of sd.shipping_zones) {
+      const hasTurkey = zone.countries && zone.countries.some(c => c.code === "TR");
+      if (!hasTurkey) continue;
+      if (zone.price_based_shipping_rates) {
+        for (const rate of zone.price_based_shipping_rates) {
+          rules.push({
+            name: rate.name,
+            price: rate.price,
+            min_order: rate.min_order_subtotal || null,
+            max_order: rate.max_order_subtotal || null,
+          });
+        }
+      }
+      if (zone.weight_based_shipping_rates) {
+        for (const rate of zone.weight_based_shipping_rates) {
+          rules.push({
+            name: rate.name,
+            price: rate.price,
+            min_weight: rate.weight_low || null,
+            max_weight: rate.weight_high || null,
+          });
+        }
+      }
+    }
+    return rules;
+  } catch (e) {
+    return [];
+  }
+}
+async function getShippingRules(env) {
+  const cache = caches.default;
+  const cacheKey = new Request("https://shopify-api.eavrasya.com/__shipping_rules");
+  const cached = await cache.match(cacheKey);
+  if (cached) return await cached.json();
+  const rules = await fetchShippingRules(env);
+  await cache.put(cacheKey, new Response(JSON.stringify(rules), {
+    headers: { "Content-Type": "application/json", "Cache-Control": "max-age=3600" },
+  }));
+  return rules;
+}
 async function getCatalog(env) {
   const cache = caches.default;
   const cacheKey = new Request("https://shopify-api.eavrasya.com/__catalog");
@@ -231,11 +286,16 @@ export default {
       }
       const cache = caches.default;
       await cache.delete(new Request("https://shopify-api.eavrasya.com/__catalog"));
+      await cache.delete(new Request("https://shopify-api.eavrasya.com/__shipping_rules"));
       const catalog = await fetchCatalog(env);
+      const shippingRules = await fetchShippingRules(env);
       await cache.put(new Request("https://shopify-api.eavrasya.com/__catalog"), new Response(JSON.stringify(catalog), {
         headers: { "Content-Type": "application/json", "Cache-Control": "max-age=3600" },
       }));
-      return new Response(JSON.stringify({ ok: true, count: catalog.length, products: catalog }), { headers: { "Content-Type": "application/json", ...corsHeaders(request) } });
+      await cache.put(new Request("https://shopify-api.eavrasya.com/__shipping_rules"), new Response(JSON.stringify(shippingRules), {
+        headers: { "Content-Type": "application/json", "Cache-Control": "max-age=3600" },
+      }));
+      return new Response(JSON.stringify({ ok: true, count: catalog.length, products: catalog, shipping_rules: shippingRules }), { headers: { "Content-Type": "application/json", ...corsHeaders(request) } });
     }
     if (path === "/analyze" && request.method === "POST") {
       if (!await checkSession(request, env)) {
@@ -293,8 +353,9 @@ export default {
       return new Response(getLoginHTML(), { headers: { "Content-Type": "text/html; charset=utf-8" } });
     }
     const catalog = await getCatalog(env);
+    const shippingRules = await getShippingRules(env);
     const storeSlug = (env.STORE || "").replace(".myshopify.com", "");
-    return new Response(getHTML(catalog, storeSlug), { headers: { "Content-Type": "text/html; charset=utf-8" } });
+    return new Response(getHTML(catalog, storeSlug, shippingRules), { headers: { "Content-Type": "text/html; charset=utf-8" } });
   }
 };
 function corsHeaders(request) {
@@ -302,9 +363,10 @@ function corsHeaders(request) {
   const allowed = origin && new URL(request.url).origin === origin;
   return { "Access-Control-Allow-Origin": allowed ? origin : "null", "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS", "Access-Control-Allow-Headers": "Content-Type,Authorization", "Access-Control-Max-Age": "86400", "Vary": "Origin" };
 }
-function getHTML(catalog, storeSlug) {
+function getHTML(catalog, storeSlug, shippingRules) {
   const catalogJSON = JSON.stringify(catalog);
   const storeSlugJSON = JSON.stringify(storeSlug || "");
+  const shippingRulesJSON = JSON.stringify(shippingRules || []);
   return `<!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -462,6 +524,7 @@ select.inp{cursor:pointer}
         <button class="pay-btn" id="payCod" onclick="setPayment('cod')">🚚 Kapıda Ödeme</button>
       </div>
       <div class="discount-row"><label class="lbl" style="margin:0;white-space:nowrap">İndirim:</label><input class="inp" id="fDiscount" type="number" placeholder="0" value="0" oninput="updateTotal()"><select id="fDiscountType" onchange="updateTotal()"><option value="tl">TL</option><option value="pct">%</option></select><span class="discount-info" id="discountInfo"></span></div>
+      <div id="shippingInfo" style="background:#0c0e14;border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:13px;display:flex;justify-content:space-between;align-items:center"></div>
       <div class="total-bar">
         <span style="color:#9ca3af">Toplam:</span>
         <span id="totalPrice" style="color:#f0f0f0;font-weight:700">0.00 TL</span>
@@ -479,7 +542,7 @@ select.inp{cursor:pointer}
           <div class="os-section">
             <div class="os-section-title">Sipariş Detayları</div>
             <div id="sucProducts"></div>
-            <div class="os-row" style="padding-top:8px"><span>Nakliye</span><span style="color:#128C7E;font-weight:600">Ücretsiz Kargo</span></div>
+            <div class="os-row" style="padding-top:8px"><span>Nakliye</span><span id="sucShipping" style="font-weight:600"></span></div>
             <div class="os-total"><span>Toplam</span><span id="sucTotal"></span></div>
           </div>
           <div class="os-section">
@@ -524,6 +587,7 @@ select.inp{cursor:pointer}
 <script>
 var CATALOG=${catalogJSON};
 var STORE_SLUG=${storeSlugJSON};
+var SHIPPING_RULES=${shippingRulesJSON};
 var TURKEY_CITIES_FE=${JSON.stringify(TURKEY_CITIES)};
 var token="",parsed=null,payment="eft",orderHistory=[];
 function $(id){return document.getElementById(id)}
@@ -610,7 +674,7 @@ async function refreshCatalog(){
   try{
     var r=await fetch("/refresh-catalog",{method:"POST"});
     var d=await r.json();
-    if(d.ok){CATALOG=d.products;showErr("Katalog guncellendi: "+d.count+" urun");setTimeout(hideErr,3000)}
+    if(d.ok){CATALOG=d.products;if(d.shipping_rules)SHIPPING_RULES=d.shipping_rules;showErr("Katalog guncellendi: "+d.count+" urun");setTimeout(hideErr,3000)}
     else{showErr("Katalog hatasi: "+(d.error||"bilinmeyen"))}
   }catch(e){showErr("Katalog hatasi: "+e.message)}
 }
@@ -802,10 +866,31 @@ function calcDiscount(){
   if(disc<0)disc=0;if(disc>sub)disc=sub;
   return{sub:sub,disc:disc};
 }
+function calcShipping(subtotal){
+  if(!SHIPPING_RULES||SHIPPING_RULES.length===0)return{name:"Ücretsiz Kargo",price:0};
+  var matched=[];
+  for(var i=0;i<SHIPPING_RULES.length;i++){
+    var r=SHIPPING_RULES[i];
+    if(r.min_order!==null&&r.min_order!==undefined&&subtotal<parseFloat(r.min_order))continue;
+    if(r.max_order!==null&&r.max_order!==undefined&&subtotal>parseFloat(r.max_order))continue;
+    matched.push({name:r.name,price:parseFloat(r.price)||0});
+  }
+  if(matched.length===0)return{name:"Kargo",price:0};
+  matched.sort(function(a,b){return a.price-b.price});
+  return matched[0];
+}
 function updateTotal(){
-  if(!parsed)return;var c=calcDiscount();var total=c.sub-c.disc;
+  if(!parsed)return;var c=calcDiscount();var subtotal=c.sub-c.disc;
+  var ship=calcShipping(subtotal);
+  var total=subtotal+ship.price;
   $("totalPrice").textContent=total.toFixed(2)+" TL";
   $("discountInfo").textContent=c.disc>0?"-"+c.disc.toFixed(2)+" TL":"";
+  var si=$("shippingInfo");
+  if(ship.price===0){
+    si.innerHTML='<span style="color:#9ca3af">🚚 Kargo</span><span style="color:#34d399;font-weight:600">'+escHtml(ship.name)+'</span>';
+  }else{
+    si.innerHTML='<span style="color:#9ca3af">🚚 Kargo</span><span style="color:#fbbf24;font-weight:600">'+escHtml(ship.name)+' — '+ship.price.toFixed(2)+' TL</span>';
+  }
 }
 function applyBundle(){
   if(!parsed)return;
@@ -850,7 +935,9 @@ async function createOrder(){
   if(!ilce)errors.push("İlçe seçilmedi");
   if(errors.length){showErr(errors.join(" · "));$("createBtn").disabled=false;return;}
   var gateway=payment==="cod"?"Cash on Delivery (COD)":"Money Order";
-  var c=calcDiscount();var totalAmount=(c.sub-c.disc).toFixed(2);
+  var c=calcDiscount();var subtotal=c.sub-c.disc;
+  var ship=calcShipping(subtotal);
+  var totalAmount=(subtotal+ship.price).toFixed(2);
   var lineItems=buildDiscountedLineItems();
   var body={order:{
     customer:{first_name:$("fAd").value,last_name:$("fSoyad").value},
@@ -860,7 +947,7 @@ async function createOrder(){
     financial_status:payment==="eft"?"paid":"pending",
     gateway:gateway,
     transactions:[{kind:"sale",status:payment==="eft"?"success":"pending",gateway:gateway,amount:totalAmount,currency:"TRY",message:payment==="eft"?"Manual EFT/Havale payment":"Pending the Cash on Delivery (COD) payment from the buyer"}],
-    shipping_lines:[{title:"Ücretsiz Kargo",price:"0.00",code:"Ücretsiz Kargo"}],
+    shipping_lines:[{title:ship.name,price:ship.price.toFixed(2),code:ship.name}],
     taxes_included:true,customer_locale:"tr-TR",
     note:$("fNot").value||null,tags:"whatsapp",inventory_behaviour:"decrement_obeying_policy",send_receipt:false,send_fulfillment_receipt:false
   }};
@@ -876,6 +963,9 @@ async function createOrder(){
       $("sucCustomer").textContent=fullName;$("sucPhone").textContent=$("fTel").value;
       $("sucAddress").textContent=addr;$("sucCity").textContent=city;
       $("sucTotal").textContent="₺"+d.total_price;
+      var sucShipEl=$("sucShipping");
+      if(ship.price===0){sucShipEl.textContent=ship.name;sucShipEl.style.color="#128C7E"}
+      else{sucShipEl.textContent=ship.name+" — ₺"+ship.price.toFixed(2);sucShipEl.style.color="#f59e0b"}
       $("sucLink").href="https://admin.shopify.com/store/"+STORE_SLUG+"/orders/"+d.id;
       var payEl=$("sucPayment");
       if(payment==="cod"){payEl.textContent="🚚 Kapida Odeme";payEl.className="os-payment cod"}
