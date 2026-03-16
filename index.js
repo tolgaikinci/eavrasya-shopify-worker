@@ -1000,9 +1000,10 @@ function resetOrder(){parsed=null;$("msgInput").value="";hide("successCard");sho
 async function copyScreenshot(){
   try{
     $("copyScreenBtn").textContent="⏳ Oluşturuluyor...";
-    var canvas=await html2canvas($("orderSummary"),{scale:2,backgroundColor:"#ffffff"});
-    var blob=await new Promise(function(r){canvas.toBlob(r,"image/png")});
+    var canvasPromise=html2canvas($("orderSummary"),{scale:2,backgroundColor:"#ffffff"});
+    var blobPromise=canvasPromise.then(function(c){return new Promise(function(r){c.toBlob(r,"image/png")})});
     if(navigator.share){
+      var blob=await blobPromise;
       var file=new File([blob],"siparis.png",{type:"image/png"});
       if(navigator.canShare&&navigator.canShare({files:[file]})){
         await navigator.share({files:[file]});
@@ -1011,19 +1012,21 @@ async function copyScreenshot(){
         return;
       }
     }
-    await navigator.clipboard.write([new ClipboardItem({"image/png":blob})]);
-    $("copyScreenBtn").textContent="✅ Kopyalandı!";
+    if(navigator.clipboard&&navigator.clipboard.write){
+      try{
+        await navigator.clipboard.write([new ClipboardItem({"image/png":blobPromise})]);
+        $("copyScreenBtn").textContent="✅ Kopyalandı!";
+        setTimeout(function(){$("copyScreenBtn").textContent="📸 Görüntü Paylaş"},2000);
+        return;
+      }catch(ce){}
+    }
+    var canvas=await canvasPromise;
+    var a=document.createElement("a");a.download="siparis.png";a.href=canvas.toDataURL("image/png");a.click();
+    $("copyScreenBtn").textContent="✅ İndirildi!";
     setTimeout(function(){$("copyScreenBtn").textContent="📸 Görüntü Paylaş"},2000);
   }catch(e){
-    try{
-      var c2=await html2canvas($("orderSummary"),{scale:2,backgroundColor:"#ffffff"});
-      var a=document.createElement("a");a.download="siparis.png";a.href=c2.toDataURL("image/png");a.click();
-      $("copyScreenBtn").textContent="✅ İndirildi!";
-      setTimeout(function(){$("copyScreenBtn").textContent="📸 Görüntü Paylaş"},2000);
-    }catch(e2){
-      $("copyScreenBtn").textContent="📸 Görüntü Paylaş";
-      showErr("Görüntü oluşturulamadı: "+e2.message);
-    }
+    $("copyScreenBtn").textContent="📸 Görüntü Paylaş";
+    showErr("Görüntü oluşturulamadı: "+e.message);
   }
 }
 function copyReply(){
