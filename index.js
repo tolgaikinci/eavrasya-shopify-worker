@@ -524,7 +524,7 @@ select.inp{cursor:pointer}
         <button class="pay-btn" id="payCod" onclick="setPayment('cod')">🚚 Kapıda Ödeme</button>
       </div>
       <div class="discount-row"><label class="lbl" style="margin:0;white-space:nowrap">İndirim:</label><input class="inp" id="fDiscount" type="number" placeholder="0" value="0" oninput="updateTotal()"><select id="fDiscountType" onchange="updateTotal()"><option value="tl">TL</option><option value="pct">%</option></select><span class="discount-info" id="discountInfo"></span></div>
-      <div id="shippingInfo" style="background:#0c0e14;border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:13px;display:flex;justify-content:space-between;align-items:center"></div>
+      <div id="shippingInfo" style="background:#0c0e14;border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:13px"></div>
       <div class="total-bar">
         <span style="color:#9ca3af">Toplam:</span>
         <span id="totalPrice" style="color:#f0f0f0;font-weight:700">0.00 TL</span>
@@ -888,10 +888,10 @@ function updateTotal(){
   var si=$("shippingInfo");
   var freeRule=SHIPPING_RULES.find(function(r){return parseFloat(r.price)===0&&r.min_order});
   if(ship.price===0){
-    si.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span style="color:#9ca3af">🚚 Kargo</span><span style="color:#34d399;font-weight:600">'+escHtml(ship.name)+'</span></div>';
+    si.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><span style="color:#9ca3af">🚚 Kargo</span><span style="color:#34d399;font-weight:600">'+escHtml(ship.name)+'</span></div>';
   }else{
-    var hint=freeRule?'<div style="font-size:11px;color:#6b7280;margin-top:6px">'+parseFloat(freeRule.min_order).toFixed(0)+' TL ve üzeri ücretsiz kargo ('+( parseFloat(freeRule.min_order)-subtotal).toFixed(0)+' TL kaldı)</div>':"";
-    si.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span style="color:#9ca3af">🚚 Kargo</span><span style="color:#fbbf24;font-weight:600">'+escHtml(ship.name)+' — '+ship.price.toFixed(2)+' TL</span></div>'+hint;
+    var hint=freeRule?'<div style="font-size:11px;color:#6b7280;margin-top:6px;text-align:right">'+parseFloat(freeRule.min_order).toFixed(0)+' TL ve üzeri ücretsiz kargo ('+( parseFloat(freeRule.min_order)-subtotal).toFixed(0)+' TL kaldı)</div>':"";
+    si.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><span style="color:#9ca3af">🚚 Kargo</span><span style="color:#fbbf24;font-weight:600">'+escHtml(ship.name)+' — '+ship.price.toFixed(2)+' TL</span></div>'+hint;
   }
 }
 function applyBundle(){
