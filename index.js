@@ -442,13 +442,13 @@ select.inp{cursor:pointer}
 .addr-fix-btn:hover{background:rgba(245,158,11,.25)}
 .os-capture *,.os-capture{animation:none!important;opacity:1!important;transform:none!important}
 .order-summary{background:#fff;border-radius:12px;padding:0;margin-bottom:12px;color:#1a1a1a;overflow:hidden}
-.os-header{background:linear-gradient(135deg,#128C7E,#25D366);padding:14px 16px;text-align:center;position:relative}
-.os-header .check{width:36px;height:36px;background:rgba(255,255,255,.2);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:6px;color:#fff}
-.os-header h2{color:#fff;font-size:15px;margin-bottom:2px}
-.os-header p{color:rgba(255,255,255,.85);font-size:11px}
-.os-order-no{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:#f0faf8;border-bottom:1px solid #e0f2ee}
-.os-order-label{font-size:11px;color:#666;font-weight:600;text-transform:uppercase;letter-spacing:.3px}
-.os-order-value{font-size:16px;font-weight:800;color:#128C7E}
+.os-header{background:#128C7E;padding:8px 16px;text-align:center;display:flex;align-items:center;justify-content:center;gap:8px}
+.os-header .check{width:24px;height:24px;background:rgba(255,255,255,.2);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:14px;color:#fff;flex-shrink:0}
+.os-header h2{color:#fff;font-size:13px;margin:0}
+.os-header p{color:rgba(255,255,255,.85);font-size:10px}
+.os-order-no{display:flex;align-items:center;gap:8px;padding:8px 16px;background:#f0faf8;border-bottom:1px solid #e0f2ee}
+.os-order-label{font-size:11px;color:#666;font-weight:600}
+.os-order-value{font-size:14px;font-weight:800;color:#128C7E}
 .os-body{padding:14px 16px}
 .os-section{margin-bottom:12px}
 .os-section-title{font-size:10px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid #eee}
@@ -457,7 +457,7 @@ select.inp{cursor:pointer}
 .os-product{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #f0f0f0}
 .os-product:last-child{border-bottom:none}
 .os-product .name{font-size:12px;color:#333;font-weight:500}
-.os-product .qty{font-size:11px;color:#888}
+.os-product .qty{font-size:11px;color:#128C7E;font-weight:600}
 .os-product .price{font-size:12px;font-weight:600;color:#1a1a1a}
 .os-total{display:flex;justify-content:space-between;padding:10px 0;border-top:2px solid #128C7E;margin-top:6px;font-size:14px;font-weight:700;color:#128C7E}
 .os-payment{display:inline-block;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600}
@@ -467,8 +467,7 @@ select.inp{cursor:pointer}
 .os-actions{display:flex;gap:8px;justify-content:center;padding:0 0 12px;flex-wrap:wrap}
 .os-actions .btn{padding:10px 24px}
 .os-actions a{display:inline-flex;align-items:center;text-decoration:none;color:#128C7E;padding:10px 16px;border:1px solid #128C7E;border-radius:8px;font-size:13px;font-weight:600}
-.os-info-row{display:flex;align-items:center;gap:8px;padding:3px 0;font-size:12px;color:#333}
-.os-info-icon{font-size:13px;width:18px;text-align:center;flex-shrink:0}
+.os-info-row{display:flex;align-items:center;padding:3px 0;font-size:12px;color:#333}
 .os-info-text{flex:1}
 .os-info-text.bold{font-weight:600;color:#1a1a1a}
 .os-wa-section{margin-bottom:0!important}
@@ -484,7 +483,7 @@ select.inp{cursor:pointer}
 .pay-tag{margin-left:8px;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600}
 .pay-tag.cod{background:rgba(245,158,11,.15);color:#fbbf24}
 .pay-tag.eft{background:rgba(59,130,246,.15);color:#60a5fa}
-@media(max-width:480px){body{padding:8px}.wrap{max-width:100%}.hdr-title{font-size:15px}.hdr-sub{font-size:10px}.tab{padding:4px 8px;font-size:11px}.card{padding:12px}.grid{grid-template-columns:1fr}.logo{width:34px;height:34px;font-size:16px;border-radius:10px}.badge{width:22px;height:22px}.btn-big{padding:12px;font-size:14px}.pay-btn{padding:12px;font-size:12px}.bundle-btn{font-size:10px;padding:6px}.discount-row .inp{width:70px}.discount-row select{width:50px}.os-header{padding:10px 14px}.os-header .check{width:30px;height:30px;font-size:16px;margin-bottom:4px}.os-header h2{font-size:14px}.os-order-no{padding:8px 12px}.os-order-value{font-size:14px}.os-body{padding:10px 12px}.os-section{margin-bottom:8px}.os-actions .btn{padding:8px 16px;font-size:12px}.os-actions a{padding:8px 12px;font-size:12px}.os-btn-bar .btn{padding:9px;font-size:12px}.sm{font-size:10px;padding:3px 7px}.token-bar{gap:5px;padding:5px 8px;font-size:11px}.ss-list{max-height:150px}.ss-item{padding:8px 10px;font-size:13px}.tag{padding:2px 8px;font-size:9px}.product-card{padding:10px}.hdr{padding-bottom:10px;margin-bottom:12px}.qty-btn{width:40px;height:40px;font-size:20px}.qty-inp{width:44px;font-size:16px}}
+@media(max-width:480px){body{padding:8px}.wrap{max-width:100%}.hdr-title{font-size:15px}.hdr-sub{font-size:10px}.tab{padding:4px 8px;font-size:11px}.card{padding:12px}.grid{grid-template-columns:1fr}.logo{width:34px;height:34px;font-size:16px;border-radius:10px}.badge{width:22px;height:22px}.btn-big{padding:12px;font-size:14px}.pay-btn{padding:12px;font-size:12px}.bundle-btn{font-size:10px;padding:6px}.discount-row .inp{width:70px}.discount-row select{width:50px}.os-header{padding:6px 12px}.os-header .check{width:22px;height:22px;font-size:12px}.os-header h2{font-size:12px}.os-order-no{padding:6px 12px}.os-order-value{font-size:13px}.os-body{padding:10px 12px}.os-section{margin-bottom:8px}.os-actions .btn{padding:8px 16px;font-size:12px}.os-actions a{padding:8px 12px;font-size:12px}.os-btn-bar .btn{padding:9px;font-size:12px}.sm{font-size:10px;padding:3px 7px}.token-bar{gap:5px;padding:5px 8px;font-size:11px}.ss-list{max-height:150px}.ss-item{padding:8px 10px;font-size:13px}.tag{padding:2px 8px;font-size:9px}.product-card{padding:10px}.hdr{padding-bottom:10px;margin-bottom:12px}.qty-btn{width:40px;height:40px;font-size:20px}.qty-inp{width:44px;font-size:16px}}
 </style>
 </head>
 <body>
@@ -551,12 +550,12 @@ select.inp{cursor:pointer}
       <div class="order-summary" id="orderSummary">
         <div class="os-header">
           <div class="check">✓</div>
-          <h2>Siparişiniz Onaylandı!</h2>
-          <p id="sucDate"></p>
+          <h2>Sipariş Onaylandı</h2>
         </div>
         <div class="os-order-no">
-          <span class="os-order-label">Sipariş Numarası</span>
+          <span class="os-order-label">Sipariş No:</span>
           <span class="os-order-value" id="sucOrderName"></span>
+          <span style="margin-left:auto;font-size:10px;color:#999" id="sucDate"></span>
         </div>
         <div class="os-body">
           <div class="os-section">
@@ -567,10 +566,10 @@ select.inp{cursor:pointer}
           </div>
           <div class="os-section">
             <div class="os-section-title">Teslimat Bilgileri</div>
-            <div class="os-info-row"><span class="os-info-icon">👤</span><span class="os-info-text bold" id="sucCustomer"></span></div>
-            <div class="os-info-row"><span class="os-info-icon">📞</span><span class="os-info-text" id="sucPhone"></span></div>
-            <div class="os-info-row"><span class="os-info-icon">📍</span><span class="os-info-text" id="sucAddress"></span></div>
-            <div class="os-info-row"><span class="os-info-icon">🏙️</span><span class="os-info-text" id="sucCity"></span></div>
+            <div class="os-info-row"><span class="os-info-text bold" id="sucCustomer"></span></div>
+            <div class="os-info-row"><span class="os-info-text" id="sucPhone"></span></div>
+            <div class="os-info-row"><span class="os-info-text" id="sucAddress"></span></div>
+            <div class="os-info-row"><span class="os-info-text" id="sucCity"></span></div>
           </div>
           <div class="os-section">
             <div class="os-section-title">Ödeme Yöntemi</div>
@@ -578,7 +577,7 @@ select.inp{cursor:pointer}
           </div>
           <div class="os-section" id="sucNoteSection">
             <div class="os-section-title">Sipariş Notu</div>
-            <div class="os-info-row"><span class="os-info-icon">📝</span><span class="os-info-text" id="sucNote"></span></div>
+            <div class="os-info-row"><span class="os-info-text" id="sucNote"></span></div>
           </div>
           <div class="os-section os-wa-section">
             <div class="os-section-title">WhatsApp Yanıtı</div>
@@ -992,7 +991,7 @@ async function createOrder(){
       var addr=$("fAdres1").value;
       var city=$("fIlce").value+"/"+$("fIl").value;
       $("sucOrderName").textContent=d.name;
-      $("sucDate").textContent=new Date().toLocaleDateString("tr-TR",{day:"numeric",month:"long",year:"numeric",hour:"2-digit",minute:"2-digit"});
+      $("sucDate").textContent=new Date().toLocaleDateString("tr-TR",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
       $("sucCustomer").textContent=fullName;$("sucPhone").textContent=$("fTel").value;
       $("sucAddress").textContent=addr;$("sucCity").textContent=city;
       $("sucTotal").textContent="₺"+d.total_price;
