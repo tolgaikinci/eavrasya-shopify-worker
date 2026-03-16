@@ -997,10 +997,10 @@ async function createOrder(){
       $("sucDate").textContent=new Date().toLocaleDateString("tr-TR",{day:"numeric",month:"long",year:"numeric",hour:"2-digit",minute:"2-digit"});
       $("sucCustomer").textContent=fullName;$("sucPhone").textContent=$("fTel").value;
       $("sucAddress").textContent=addr;$("sucCity").textContent=city;
-      $("sucTotal").textContent="₺"+d.total_price;
+      $("sucTotal").textContent="₺"+parseFloat(d.total_price).toFixed(0);
       var sucShipEl=$("sucShipping");
       if(ship.price===0){sucShipEl.textContent=ship.name;sucShipEl.style.color="#128C7E"}
-      else{sucShipEl.textContent=ship.name+" — ₺"+ship.price.toFixed(2);sucShipEl.style.color="#f59e0b"}
+      else{sucShipEl.textContent=ship.name+" — ₺"+ship.price.toFixed(0);sucShipEl.style.color="#f59e0b"}
       $("sucLink").href="https://admin.shopify.com/store/"+STORE_SLUG+"/orders/"+d.id;
       var payEl=$("sucPayment");
       if(payment==="cod"){payEl.textContent="🚚 Kapida Odeme";payEl.className="os-payment cod"}
@@ -1012,8 +1012,8 @@ async function createOrder(){
       for(var idx=0;idx<discItems.length;idx++){
         var di=discItems[idx];var dp=di.price;var dq=di.quantity;
         var dName=di.title||(parsed.urunler.find(function(u){return u.variant_id&&u.variant_id===di.variant_id})||{}).ad||"Ürün";
-        var lt=(parseFloat(dp)*dq).toFixed(2);
-        prodHTML+='<div class="os-product"><div><div class="name">'+escHtml(dName)+'</div><div class="qty"><b>'+dq+' adet</b> × ₺'+dp+'</div></div><div class="price">₺'+lt+'</div></div>';
+        var lt=(parseFloat(dp)*dq).toFixed(0);
+        prodHTML+='<div class="os-product"><div><div class="name">'+escHtml(dName)+'</div><div class="qty"><b>'+dq+' adet</b> × ₺'+parseFloat(dp).toFixed(0)+'</div></div><div class="price">₺'+lt+'</div></div>';
       }
       $("sucProducts").innerHTML=prodHTML;
       var payLabel=payment==="cod"?"kapıda ödeme":"havale";
